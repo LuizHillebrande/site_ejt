@@ -14,8 +14,8 @@ export default function About() {
             className="relative h-[400px] rounded-xl overflow-hidden"
           >
             <Image
-              src="/images/ipt/mapa.png"
-              alt="Mapa IPT"
+              src="/images/logos/logo-completa.png"
+              alt="Logo Completa"
               fill
               className="object-cover"
             />

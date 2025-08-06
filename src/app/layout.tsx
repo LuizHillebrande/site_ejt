@@ -21,9 +21,9 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className="font-sans bg-background text-primary">
         <Header />
-        <div className="pt-28 min-h-screen flex flex-col">
+        <main className="pt-32">
           {children}
-        </div>
+        </main>
         <Footer />
       </body>
     </html>
