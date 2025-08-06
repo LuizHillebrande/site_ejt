@@ -1,135 +1,220 @@
-import Image from "next/image";
+"use client";
 
-export default async function ServicosPage() {
+import Image from "next/image";
+import { motion } from "framer-motion";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
+const servicos = [
+  {
+    id: "acao-social",
+    titulo: "Ação Social",
+    descricao: "Desenvolvemos projetos que impactam positivamente nossa comunidade, promovendo inclusão e desenvolvimento social.",
+    detalhes: [
+      "Arrecadação e distribuição de alimentos",
+      "Atividades com idosos e crianças",
+      "Projetos de educação financeira",
+    ],
+    imagens: [
+      "/images/servicos/acao_social_1.png",
+      "/images/servicos/acao_social_2.png",
+      "/images/servicos/acao_social_3.png"
+    ],
+    corFundo: "bg-primary/5"
+  },
+  {
+    id: "pesquisas",
+    titulo: "Pesquisas de Campo",
+    descricao: "Realizamos pesquisas nas ruas para entender melhor as necessidades da comunidade e do mercado local.",
+    detalhes: [
+      "Análise de mercado local",
+      "Pesquisas de opinião pública",
+      "Levantamento de dados socioeconômicos"
+    ],
+    imagens: [
+      "/images/servicos/consultoria_1.png",
+      "/images/servicos/consultoria_2.png"
+    ],
+    corFundo: "bg-white"
+  },
+  {
+    id: "eventos",
+    titulo: "Eventos Acadêmicos",
+    descricao: "Organizamos eventos exclusivos dentro da faculdade com vagas limitadas, proporcionando experiências únicas para os alunos.",
+    detalhes: [
+      "Palestras com profissionais",
+      "Workshops práticos",
+      "Networking entre alunos"
+    ],
+    imagens: [
+      "/images/servicos/eventos_1.png",
+      "/images/servicos/eventos_2.png"
+    ],
+    corFundo: "bg-secondary/5"
+  }
+];
+
+function ServicoSection({ servico, index }: any) {
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: true,
+    pauseOnHover: true
+  };
+
+  return (
+    <section className={`py-20 ${servico.corFundo}`}>
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="max-w-6xl mx-auto"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-4xl font-bold text-dark mb-6">{servico.titulo}</h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  {servico.descricao}
+                </p>
+                <ul className="space-y-4">
+                  {servico.detalhes.map((detalhe: string, idx: number) => (
+                    <motion.li
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 + idx * 0.1 }}
+                      viewport={{ once: true }}
+                      className="flex items-center text-gray-700"
+                    >
+                      <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                      {detalhe}
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
+
+            <div className="order-1 lg:order-2">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+                className="rounded-2xl overflow-hidden shadow-xl"
+              >
+                <Slider {...settings}>
+                  {servico.imagens.map((imagem: string, idx: number) => (
+                    <div key={idx} className="relative aspect-[4/3]">
+                      <Image
+                        src={imagem}
+                        alt={`${servico.titulo} - Imagem ${idx + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    </div>
+                  ))}
+                </Slider>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+export default function ServicosPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 bg-gradient-to-br from-primary/10 to-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-dark mb-6">
-              Nossos Serviços
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Conheça os serviços que oferecemos para a comunidade acadêmica e sociedade
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Ação Social Section */}
-      <section className="py-24 bg-primary/10">
+      <section className="relative pt-32 pb-24 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-dark mb-6">Ação Social</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Desenvolvemos projetos que impactam positivamente nossa comunidade, promovendo inclusão e desenvolvimento social.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/acao_social_1.png"
-                  alt="Ação Social 1"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/acao_social_2.png"
-                  alt="Ação Social 2"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/acao_social_3.png"
-                  alt="Ação Social 3"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Logo */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="flex justify-center lg:justify-start"
+              >
+                <div className="relative w-64 h-64 lg:w-80 lg:h-80">
+                  <Image
+                    src="/images/logos/logo-completa.png"
+                    alt="Logo EJT"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Texto */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-left lg:border-l-2 lg:border-primary/20 lg:pl-12"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  <h1 className="text-4xl lg:text-5xl font-bold text-dark mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Nossos Serviços
+                  </h1>
+                </motion.div>
+                
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="text-lg lg:text-xl text-gray-600 leading-relaxed"
+                >
+                  Oferecemos uma variedade de serviços focados no desenvolvimento acadêmico e social, 
+                  <span className="text-primary font-semibold"> sempre buscando impactar positivamente </span>
+                  nossa comunidade através de ações práticas e efetivas.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.5 }}
+                  className="mt-8 flex gap-4"
+                >
+                  <div className="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+                  <div className="h-1 w-10 bg-gradient-to-r from-primary to-secondary opacity-50 rounded-full"></div>
+                  <div className="h-1 w-5 bg-gradient-to-r from-primary to-secondary opacity-30 rounded-full"></div>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-1/2 left-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-3xl"></div>
       </section>
 
-      {/* Pesquisas Section */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-dark mb-6">Pesquisas de Campo</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Realizamos pesquisas nas ruas para entender melhor as necessidades da comunidade e do mercado local.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/consultoria_1.png"
-                  alt="Pesquisa 1"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/consultoria_2.png"
-                  alt="Pesquisa 2"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Eventos Section */}
-      <section className="py-24 bg-secondary/10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-dark mb-6">Eventos Acadêmicos</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Organizamos eventos exclusivos dentro da faculdade com vagas limitadas, proporcionando experiências únicas para os alunos.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/eventos_1.png"
-                  alt="Evento 1"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-              <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl group">
-                <Image
-                  src="/images/servicos/eventos_2.png"
-                  alt="Evento 2"
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Serviços Sections */}
+      {servicos.map((servico, index) => (
+        <ServicoSection key={servico.id} servico={servico} index={index} />
+      ))}
     </div>
   );
 }

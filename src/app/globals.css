@@ -53,3 +53,70 @@
   background-size: 200% 200%;
   animation: gradient 15s ease infinite;
 }
+
+/* Carousel styles */
+.slick-slider {
+  margin: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.slick-dots {
+  bottom: 16px !important;
+  z-index: 20 !important;
+}
+
+.slick-dots li {
+  margin: 0 4px !important;
+}
+
+.slick-dots li button:before {
+  color: white !important;
+  font-size: 8px !important;
+  opacity: 0.7 !important;
+  transition: all 0.3s ease !important;
+}
+
+.slick-dots li.slick-active button:before {
+  opacity: 1 !important;
+  color: theme('colors.primary') !important;
+  transform: scale(1.5);
+}
+
+.slick-prev,
+.slick-next {
+  width: 36px !important;
+  height: 36px !important;
+  z-index: 20 !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(4px) !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  opacity: 0 !important;
+}
+
+.slick-slider:hover .slick-prev,
+.slick-slider:hover .slick-next {
+  opacity: 1 !important;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+  background-color: theme('colors.primary') !important;
+  transform: scale(1.1);
+}
+
+.slick-prev {
+  left: 16px !important;
+}
+
+.slick-next {
+  right: 16px !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  font-size: 20px !important;
+  opacity: 1 !important;
+  color: white !important;
+}
