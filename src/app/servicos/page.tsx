@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import ImageEditor from '@/components/ImageEditor';
 
 const servicos = [
   {
@@ -55,7 +58,10 @@ const servicos = [
   }
 ];
 
-function ServicoSection({ servico, index }: any) {
+function ServicoSection({ servico, index, onEdit }: any) {
+  const searchParams = useSearchParams();
+  const isEditing = searchParams.get('edit') === 'true';
+
   const settings = {
     dots: true,
     infinite: true,
@@ -114,7 +120,7 @@ function ServicoSection({ servico, index }: any) {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8 }}
                 viewport={{ once: true }}
-                className="rounded-2xl overflow-hidden shadow-xl"
+                className="rounded-2xl overflow-hidden shadow-xl relative"
               >
                 <Slider {...settings}>
                   {servico.imagens.map((imagem: string, idx: number) => (
@@ -129,6 +135,14 @@ function ServicoSection({ servico, index }: any) {
                     </div>
                   ))}
                 </Slider>
+                {isEditing && (
+                  <button
+                    onClick={() => onEdit?.(servico.id)}
+                    className="absolute top-4 right-4 px-4 py-2 bg-primary text-white rounded-lg shadow-lg hover:bg-primary/90 transition-colors z-10"
+                  >
+                    Editar imagens
+                  </button>
+                )}
               </motion.div>
             </div>
           </div>
@@ -139,6 +153,27 @@ function ServicoSection({ servico, index }: any) {
 }
 
 export default function ServicosPage() {
+  const searchParams = useSearchParams();
+  const isEditing = searchParams.get('edit') === 'true';
+  const [editingService, setEditingService] = useState<string | null>(null);
+  const [servicosState, setServicosState] = useState(servicos);
+
+  const handleEdit = (id: string) => {
+    setEditingService(id);
+  };
+
+  const handleSave = async (id: string, newImages: string[]) => {
+    // Aqui você faria uma chamada à API para salvar as novas imagens
+    setServicosState(prev => prev.map(servico => 
+      servico.id === id ? { ...servico, imagens: newImages } : servico
+    ));
+    setEditingService(null);
+  };
+
+  const currentService = editingService 
+    ? servicosState.find(s => s.id === editingService)
+    : null;
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -212,9 +247,25 @@ export default function ServicosPage() {
       </section>
 
       {/* Serviços Sections */}
-      {servicos.map((servico, index) => (
-        <ServicoSection key={servico.id} servico={servico} index={index} />
+      {servicosState.map((servico, index) => (
+        <ServicoSection 
+          key={servico.id} 
+          servico={servico} 
+          index={index}
+          onEdit={handleEdit}
+        />
       ))}
+
+      {/* Editor Modal */}
+      {currentService && (
+        <ImageEditor
+          images={currentService.imagens}
+          onSave={(images) => handleSave(currentService.id, images)}
+          onCancel={() => setEditingService(null)}
+          title={`Editar imagens - ${currentService.titulo}`}
+          description="Adicione ou remova imagens do carrossel. As imagens devem ter proporção 4:3 para melhor visualização."
+        />
+      )}
     </div>
   );
 } 

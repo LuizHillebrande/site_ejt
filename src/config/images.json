@@ -1,0 +1,24 @@
+{
+  "servicos": {
+    "acao-social": [
+      "/images/servicos/acao_social_1.png",
+      "/images/servicos/acao_social_2.png",
+      "/images/servicos/acao_social_3.png"
+    ],
+    "pesquisas": [
+      "/images/servicos/consultoria_1.png",
+      "/images/servicos/consultoria_2.png"
+    ],
+    "eventos": [
+      "/images/servicos/eventos_1.png",
+      "/images/servicos/eventos_2.png"
+    ]
+  },
+  "ipt": {
+    "carrousel": [
+      "/images/ipt/carrousel/img_1.png",
+      "/images/ipt/carrousel/img_2.png",
+      "/images/ipt/carrousel/img_3.png"
+    ]
+  }
+} 

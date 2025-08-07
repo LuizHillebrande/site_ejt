@@ -3,6 +3,8 @@ import { Download, ArrowRight, CheckCircle, ChevronLeft, ChevronRight } from "lu
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
+import ImageEditor from '@/components/ImageEditor';
 
 const iptData = [
   { label: "Maiores preços", value: "R$ 503,43" },
@@ -39,6 +41,33 @@ const carouselImages = [
 ];
 
 export default function IPT() {
+  const searchParams = useSearchParams();
+  const isEditing = searchParams.get('edit') === 'true';
+  const [showEditor, setShowEditor] = useState(false);
+  const [currentImages, setCurrentImages] = useState(carouselImages);
+
+  const handleSave = async (newImages: string[]) => {
+    try {
+      const response = await fetch('/api/images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page: 'ipt',
+          section: 'carrousel',
+          images: newImages
+        })
+      });
+
+      if (!response.ok) throw new Error('Falha ao salvar imagens');
+
+      setCurrentImages(newImages);
+      setShowEditor(false);
+    } catch (error) {
+      console.error('Erro ao salvar imagens:', error);
+      alert('Erro ao salvar as alterações');
+    }
+  };
+
   return (
     <main className="bg-background min-h-screen pt-28 pb-0">
       <div className="max-w-6xl mx-auto flex flex-col gap-20 px-4 md:px-6">
@@ -109,7 +138,17 @@ export default function IPT() {
             </p>
           </motion.div>
           {/* Carrossel de imagens */}
-          <CarouselIPT />
+          <div className="relative">
+            <CarouselIPT images={currentImages} />
+            {isEditing && (
+              <button
+                onClick={() => setShowEditor(true)}
+                className="absolute top-4 right-4 px-4 py-2 bg-primary text-white rounded-lg shadow-lg hover:bg-primary/90 transition-colors z-20"
+              >
+                Editar imagens
+              </button>
+            )}
+          </div>
         </section>
         {/* Vantagens */}
         <section>
@@ -158,26 +197,40 @@ export default function IPT() {
           </motion.div>
         </section>
       </div>
+
+      {/* Editor Modal */}
+      {showEditor && (
+        <ImageEditor
+          images={currentImages}
+          onSave={handleSave}
+          onCancel={() => setShowEditor(false)}
+          title="Editar imagens do IPT"
+          description="Adicione ou remova imagens do carrossel. As imagens devem ter proporção 4:3 para melhor visualização."
+        />
+      )}
     </main>
   );
 }
 
 // Componente de carrossel de imagens
-function CarouselIPT() {
+function CarouselIPT({ images }: { images: string[] }) {
   const [index, setIndex] = useState(0);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => (prev + 1) % carouselImages.length);
+      setIndex((prev) => (prev + 1) % images.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
+
   const goTo = (dir: 'left' | 'right') => {
     setIndex((prev) => {
-      if (dir === "left") return prev === 0 ? carouselImages.length - 1 : prev - 1;
-      if (dir === "right") return (prev + 1) % carouselImages.length;
+      if (dir === "left") return prev === 0 ? images.length - 1 : prev - 1;
+      if (dir === "right") return (prev + 1) % images.length;
       return prev;
     });
   };
+
   return (
     <div className="w-full flex justify-center relative">
       {/* Botão esquerda */}
@@ -196,7 +249,7 @@ function CarouselIPT() {
         className="rounded-2xl shadow-lg overflow-hidden bg-white flex items-center justify-center h-64 md:h-72 w-full max-w-md"
       >
         <Image
-          src={carouselImages[index]}
+          src={images[index]}
           alt={`Foto IPT ${index + 1}`}
           width={400}
           height={288}

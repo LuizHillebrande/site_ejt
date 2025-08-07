@@ -1,40 +1,101 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-export function usePageViews(page: string) {
-  const [views, setViews] = useState<number>(0);
+export function usePageViews(page: string = 'all') {
+  const [views, setViews] = useState(0);
   const [hasRegistered, setHasRegistered] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Função para buscar views
+  const fetchViews = async () => {
+    try {
+      // Cancela requisição anterior se existir
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Cria novo controller para esta requisição
+      abortControllerRef.current = new AbortController();
+
+      const response = await fetch(`/api/views?page=${page}`, {
+        signal: abortControllerRef.current.signal
+      });
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      if (typeof data.views === 'number') {
+        setViews(data.views);
+      }
+    } catch (error) {
+      // Ignora erros de abort
+      if ((error as any)?.name === 'AbortError') return;
+      console.error('Error fetching views:', error);
+    }
+  };
+
+  // Função para registrar view
+  const registerView = async () => {
+    if (hasRegistered) return;
+
+    try {
+      const response = await fetch('/api/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page })
+      });
+
+      if (!response.ok) return;
+      setHasRegistered(true);
+
+      // Atualiza a contagem após registrar
+      fetchViews();
+    } catch (error) {
+      console.error('Error registering view:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchViews = async () => {
-      try {
-        // Registra a visualização apenas uma vez por montagem do componente
-        if (!hasRegistered) {
-          await fetch('/api/views', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ page })
-          });
-          setHasRegistered(true);
-        }
+    let mounted = true;
 
-        // Busca o total de visualizações
-        const response = await fetch('/api/views');
-        const data = await response.json();
-        setViews(data.total || 0);
-      } catch (error) {
-        console.error('Erro ao registrar/buscar visualizações:', error);
-      }
+    const init = async () => {
+      if (!mounted) return;
+      await fetchViews();
+      await registerView();
     };
 
-    fetchViews();
+    init();
 
-    // Atualiza as visualizações a cada 30 segundos
-    const interval = setInterval(fetchViews, 30000);
+    // Atualiza a cada 30 segundos
+    const startPolling = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        if (mounted) {
+          fetchViews();
+          startPolling();
+        }
+      }, 30000);
+    };
+
+    startPolling();
 
     return () => {
-      clearInterval(interval);
+      mounted = false;
+      
+      // Limpa timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      // Cancela requisição pendente
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
-  }, [page, hasRegistered]);
+  }, [page]);
 
   return views;
 } 

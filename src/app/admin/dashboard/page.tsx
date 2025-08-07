@@ -13,7 +13,8 @@ import {
   ArrowTrendingUpIcon,
   EyeIcon,
   UserGroupIcon,
-  DocumentIcon
+  DocumentIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 import { usePageViews } from '@/hooks/usePageViews';
 import NewProjectModal from '@/components/admin/NewProjectModal';
@@ -45,7 +46,7 @@ export default function AdminDashboard() {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'dashboard' | 'team' | 'projects' | 'events'>('dashboard');
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'team' | 'projects' | 'events' | 'images'>('dashboard');
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
@@ -224,7 +225,12 @@ export default function AdminDashboard() {
     { name: 'Equipe', icon: UsersIcon, section: 'team' },
     { name: 'Projetos', icon: DocumentTextIcon, section: 'projects' },
     { name: 'Eventos', icon: CalendarIcon, section: 'events' },
+    { name: 'Imagens', icon: PhotoIcon, section: 'images' },
   ] as const;
+
+  const handleImageEdit = (page: 'servicos' | 'ipt') => {
+    router.push(`/${page}?edit=true`);
+  };
 
   const renderContent = () => {
     switch (currentSection) {
@@ -250,6 +256,39 @@ export default function AdminDashboard() {
             events={events}
             onDelete={handleDeleteEvent}
           />
+        );
+      case 'images':
+        return (
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Gerenciar Imagens</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <button
+                onClick={() => handleImageEdit('servicos')}
+                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center gap-4"
+              >
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <PhotoIcon className="w-8 h-8 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Página de Serviços</h3>
+                  <p className="text-sm text-gray-500">Editar imagens dos carrosséis de serviços</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleImageEdit('ipt')}
+                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col items-center gap-4"
+              >
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                  <PhotoIcon className="w-8 h-8 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Página do IPT</h3>
+                  <p className="text-sm text-gray-500">Editar imagens do carrossel do IPT</p>
+                </div>
+              </button>
+            </div>
+          </div>
         );
       default:
         return (

@@ -6,16 +6,55 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    subject: "",
     message: "",
   });
 
   const [focused, setFocused] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aqui você pode adicionar a lógica de envio do formulário
-    console.log("Formulário enviado:", formData);
+    setIsLoading(true);
+    setStatus({ type: null, message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus({
+          type: 'success',
+          message: 'Mensagem enviada com sucesso! Em breve entraremos em contato.'
+        });
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        throw new Error(data.error || 'Erro ao enviar mensagem');
+      }
+    } catch (error) {
+      setStatus({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Erro ao enviar mensagem'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const inputVariants = {
@@ -62,6 +101,18 @@ export default function Contact() {
           </motion.p>
         </motion.div>
 
+        {status.type && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-6 p-4 rounded-lg text-center ${
+              status.type === 'success' ? 'bg-green-500/20' : 'bg-red-500/20'
+            }`}
+          >
+            {status.message}
+          </motion.div>
+        )}
+
         <motion.form
           onSubmit={handleSubmit}
           className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl"
@@ -83,6 +134,7 @@ export default function Contact() {
                 animate={focused === "name" ? "focused" : "unfocused"}
                 className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/50"
                 required
+                disabled={isLoading}
               />
             </motion.div>
 
@@ -98,22 +150,24 @@ export default function Contact() {
                 animate={focused === "email" ? "focused" : "unfocused"}
                 className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/50"
                 required
+                disabled={isLoading}
               />
             </motion.div>
           </div>
 
           <motion.div className="mt-4" variants={itemVariants}>
             <motion.input
-              type="tel"
-              placeholder="Telefone"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              onFocus={() => setFocused("phone")}
+              type="text"
+              placeholder="Assunto"
+              value={formData.subject}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              onFocus={() => setFocused("subject")}
               onBlur={() => setFocused("")}
               variants={inputVariants}
-              animate={focused === "phone" ? "focused" : "unfocused"}
+              animate={focused === "subject" ? "focused" : "unfocused"}
               className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/50"
               required
+              disabled={isLoading}
             />
           </motion.div>
 
@@ -129,17 +183,23 @@ export default function Contact() {
               rows={4}
               className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/20 focus:border-white/40 focus:outline-none transition-colors placeholder:text-white/50 resize-none"
               required
+              disabled={isLoading}
             />
           </motion.div>
 
           <motion.div className="mt-6" variants={itemVariants}>
             <motion.button
               type="submit"
-              className="w-full bg-white text-primary font-semibold py-3 px-6 rounded-lg hover:bg-white/90 transition-colors"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className={`w-full font-semibold py-3 px-6 rounded-lg transition-colors ${
+                isLoading
+                  ? 'bg-white/50 text-primary/50 cursor-not-allowed'
+                  : 'bg-white text-primary hover:bg-white/90'
+              }`}
+              whileHover={!isLoading ? { scale: 1.02 } : {}}
+              whileTap={!isLoading ? { scale: 0.98 } : {}}
+              disabled={isLoading}
             >
-              Enviar Mensagem
+              {isLoading ? 'Enviando...' : 'Enviar Mensagem'}
             </motion.button>
           </motion.div>
         </motion.form>
