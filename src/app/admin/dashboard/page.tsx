@@ -25,6 +25,7 @@ import CountUp from 'react-countup';
 import TeamSection from '@/components/admin/TeamSection';
 import ProjectsSection from '@/components/admin/ProjectsSection';
 import EventsSection from '@/components/admin/EventsSection';
+import IPTSection from '@/components/admin/IPTSection';
 import { TeamMember, Project, Event, Activity } from '@/types/admin';
 
 function getCookie(name: string) {
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [currentSection, setCurrentSection] = useState<'dashboard' | 'team' | 'projects' | 'events' | 'images'>('dashboard');
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'team' | 'projects' | 'events' | 'images' | 'ipt'>('dashboard');
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
@@ -225,6 +226,7 @@ export default function AdminDashboard() {
     { name: 'Equipe', icon: UsersIcon, section: 'team' },
     { name: 'Projetos', icon: DocumentTextIcon, section: 'projects' },
     { name: 'Eventos', icon: CalendarIcon, section: 'events' },
+    { name: 'IPT', icon: ChartBarIcon, section: 'ipt' },
     { name: 'Imagens', icon: PhotoIcon, section: 'images' },
   ] as const;
 
@@ -257,6 +259,8 @@ export default function AdminDashboard() {
             onDelete={handleDeleteEvent}
           />
         );
+      case 'ipt':
+        return <IPTSection />;
       case 'images':
         return (
           <div className="bg-white rounded-xl shadow-sm p-6">

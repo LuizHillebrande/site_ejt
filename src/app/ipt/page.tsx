@@ -1,20 +1,20 @@
 'use client';
-import { Download, ArrowRight, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useSearchParams } from 'next/navigation';
 import ImageEditor from '@/components/ImageEditor';
 
-const iptData = [
-  { label: "Maiores preços", value: "R$ 503,43" },
-  { label: "Menores preços", value: "R$ 297,78" },
-  { label: "Diferença", value: "69,06%" },
-  { label: "Preços médios", value: "R$ 412,46" },
-  { label: "Anterior", value: "R$ 1.130,03" },
-  { label: "Atual", value: "R$ 1.085,58" },
-  { label: "Inflação", value: "-3,93%" },
-];
+interface IPTData {
+  maiorPreco: number;
+  menorPreco: number;
+  diferenca: number;
+  precoMedio: number;
+  anterior: number;
+  atual: number;
+  inflacao: number;
+}
 
 const vantagens = [
   {
@@ -45,6 +45,38 @@ export default function IPT() {
   const isEditing = searchParams.get('edit') === 'true';
   const [showEditor, setShowEditor] = useState(false);
   const [currentImages, setCurrentImages] = useState(carouselImages);
+  const [iptData, setIptData] = useState<IPTData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchIPTData();
+  }, []);
+
+  const fetchIPTData = async () => {
+    try {
+      const response = await fetch('/api/ipt');
+      if (!response.ok) throw new Error('Failed to fetch IPT data');
+      const data = await response.json();
+      setIptData(data);
+    } catch (error) {
+      console.error('Error fetching IPT data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(2).replace('.', ',')}%`;
+  };
 
   const handleSave = async (newImages: string[]) => {
     try {
@@ -66,6 +98,20 @@ export default function IPT() {
       console.error('Erro ao salvar imagens:', error);
       alert('Erro ao salvar as alterações');
     }
+  };
+
+  const getIPTItems = () => {
+    if (!iptData) return [];
+
+    return [
+      { label: "Maiores preços", value: formatCurrency(iptData.maiorPreco) },
+      { label: "Menores preços", value: formatCurrency(iptData.menorPreco) },
+      { label: "Diferença", value: formatPercentage(iptData.diferenca) },
+      { label: "Preços médios", value: formatCurrency(iptData.precoMedio) },
+      { label: "Anterior", value: formatCurrency(iptData.anterior) },
+      { label: "Atual", value: formatCurrency(iptData.atual) },
+      { label: "Inflação", value: formatPercentage(iptData.inflacao) },
+    ];
   };
 
   return (
@@ -93,7 +139,6 @@ export default function IPT() {
             className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-secondary transition duration-300 hover:scale-105 text-lg"
             whileHover={{ scale: 1.05 }}
           >
-            <Download className="w-5 h-5" />
             Baixar relatório mais recente
           </motion.a>
         </section>
@@ -109,19 +154,32 @@ export default function IPT() {
             <span className="font-bold text-primary">Mapa de Presidente Prudente</span>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-            {iptData.map((item, i) => (
-              <motion.div
-                key={item.label}
-                className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white font-bold rounded-xl p-4 shadow-lg flex flex-col items-center"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.05 * i }}
-              >
-                <span className="text-sm opacity-90 font-medium">{item.label}</span>
-                <span className="text-2xl md:text-3xl font-extrabold">{item.value}</span>
-              </motion.div>
-            ))}
+            {isLoading ? (
+              // Loading skeleton
+              Array(7).fill(0).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="bg-gradient-to-r from-orange-400/50 to-yellow-500/50 text-white font-bold rounded-xl p-4 shadow-lg flex flex-col items-center animate-pulse"
+                >
+                  <div className="h-4 w-24 bg-white/20 rounded mb-2"></div>
+                  <div className="h-8 w-32 bg-white/20 rounded"></div>
+                </motion.div>
+              ))
+            ) : (
+              getIPTItems().map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white font-bold rounded-xl p-4 shadow-lg flex flex-col items-center"
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.05 * i }}
+                >
+                  <span className="text-sm opacity-90 font-medium">{item.label}</span>
+                  <span className="text-2xl md:text-3xl font-extrabold">{item.value}</span>
+                </motion.div>
+              ))
+            )}
           </div>
         </section>
         {/* Sobre o IPT + Carrossel */}
@@ -171,30 +229,16 @@ export default function IPT() {
           </div>
         </section>
         {/* Relatórios Anteriores */}
-        <section className="flex flex-col items-center gap-4">
+        <section className="flex flex-col items-center gap-4 mb-20">
           <span className="text-lg md:text-xl text-center">Quer consultar relatórios anteriores?</span>
-          <a href="#" className="flex items-center gap-1 text-orange-600 underline hover:text-orange-800 font-semibold transition">
+          <a 
+            href="https://app.powerbi.com/view?r=eyJrIjoiZTc1NTA4MDItYjRiOC00MjVjLWJlNjMtYzIwZjA5MmM4NmIzIiwidCI6IjJmMGM2MTMzLWE3NDQtNDNhNC04MTY2LTEwYjA5ODZjOThjNCJ9" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-orange-600 underline hover:text-orange-800 font-semibold transition"
+          >
             Ver últimos relatórios <ArrowRight className="w-4 h-4" />
           </a>
-        </section>
-        {/* Call to Action Final */}
-        <section className="flex justify-center">
-          <motion.div
-            className="bg-primary rounded-2xl shadow-xl p-8 flex flex-col items-center gap-4 w-full md:w-2/3 text-center"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <span className="text-white text-2xl md:text-3xl font-bold mb-2">Mantenha-se informado.</span>
-            <span className="text-white text-lg mb-4">Faça o download do último relatório IPT agora mesmo.</span>
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 bg-white text-primary px-8 py-3 rounded-full font-bold shadow-lg hover:bg-secondary hover:text-white transition duration-300 hover:scale-105 text-lg"
-            >
-              <Download className="w-5 h-5" />
-              Baixar agora
-            </a>
-          </motion.div>
         </section>
       </div>
 
