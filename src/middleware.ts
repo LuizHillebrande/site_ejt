@@ -2,19 +2,24 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  // Verifica se a rota começa com /admin
-  if (request.nextUrl.pathname.startsWith("/admin")) {
-    // Não aplica proteção na página de login
-    if (request.nextUrl.pathname === "/admin/login") {
-      return NextResponse.next();
+  // Verifica se já está logado ao tentar acessar a página de login
+  if (request.nextUrl.pathname === "/admin/login") {
+    const token = request.cookies.get("adminToken");
+    if (token) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
+    return NextResponse.next();
+  }
 
-    // Verifica se existe um token de admin
+  // Proteção das rotas administrativas
+  if (request.nextUrl.pathname.startsWith("/admin")) {
     const token = request.cookies.get("adminToken");
     
-    if (!token) {
-      // Redireciona para a página de login se não houver token
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+    if (!token || token.value !== "logged_in") {
+      // Remove o cookie inválido se existir
+      const response = NextResponse.redirect(new URL("/admin/login", request.url));
+      response.cookies.delete("adminToken");
+      return response;
     }
   }
 
@@ -23,5 +28,7 @@ export function middleware(request: NextRequest) {
 
 // Configuração para aplicar o middleware apenas nas rotas /admin
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: [
+    "/admin/:path*"
+  ]
 }; 

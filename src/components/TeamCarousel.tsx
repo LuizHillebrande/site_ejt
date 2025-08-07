@@ -16,15 +16,20 @@ export default function TeamCarousel() {
   const controls = useAnimation();
 
   useEffect(() => {
+    let isMounted = true;
     const animate = async () => {
-      while (true) {
+      while (isMounted) {
         await controls.start({ x: "-50%" }, { duration: 10, ease: "linear" });
-        controls.set({ x: 0 });
+        if (isMounted) {
+          controls.set({ x: 0 });
+        }
       }
     };
     animate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [controls]);
 
   return (
     <section id="equipe" className="bg-background py-24">
