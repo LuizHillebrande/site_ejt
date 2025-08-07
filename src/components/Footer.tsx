@@ -1,4 +1,6 @@
+"use client";
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 export default function Footer() {
   return (
@@ -7,11 +9,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0">
             <Image
-              src="/images/logos/logo-footer.png"
+              src="/images/logos/logo-azul.png"
               alt="Logo EJT"
               width={150}
               height={50}
-              className="h-auto"
+              className="h-auto w-32 rounded-lg transition-all duration-300 hover:brightness-110"
             />
           </div>
           
