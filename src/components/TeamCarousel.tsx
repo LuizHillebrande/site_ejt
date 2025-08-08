@@ -1,6 +1,6 @@
 "use client";
 import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const team = [
   { name: "Letícia Costa", role: "Presidente", image: "/images/equipe/leticia_costa.png" },
@@ -14,22 +14,34 @@ const infiniteTeam = [...team, ...team];
 
 export default function TeamCarousel() {
   const controls = useAnimation();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    let timeoutId: NodeJS.Timeout;
     const animate = async () => {
-      while (isMounted) {
+      while (mounted) {
         await controls.start({ x: "-50%" }, { duration: 10, ease: "linear" });
-        if (isMounted) {
+        if (mounted) {
           controls.set({ x: 0 });
+          // Pequena pausa para evitar flickering
+          timeoutId = setTimeout(animate, 50);
         }
       }
     };
+
     animate();
+
     return () => {
-      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [controls]);
+  }, [controls, mounted]);
 
   return (
     <section id="equipe" className="bg-background py-24">
