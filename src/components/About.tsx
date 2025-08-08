@@ -11,13 +11,14 @@ export default function About() {
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative h-[400px] rounded-xl overflow-hidden"
+            className="relative h-[200px] md:h-[400px] rounded-xl overflow-hidden"
           >
             <Image
               src="/images/logos/logo-completa.png"
               alt="Logo Completa"
               fill
-              className="object-cover"
+              className="object-contain md:object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </motion.div>
 

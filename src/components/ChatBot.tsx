@@ -121,7 +121,7 @@ export default function ChatBot() {
   return (
     <>
       {/* Botão do chatbot com balão de fala */}
-      <div className="fixed bottom-8 right-8 z-50 flex items-center gap-3">
+      <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 flex items-center gap-3">
         {showBubble && !isOpen && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -141,15 +141,17 @@ export default function ChatBot() {
             setIsOpen(!isOpen);
             setShowBubble(false);
           }}
-          className="bg-primary rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-primary rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
         >
-          <Image
-            src="/images/robo/robozinho.png"
-            alt="Chatbot"
-            width={60}
-            height={60}
-            className="rounded-full"
-          />
+          <div className="relative w-[45px] h-[45px] md:w-[60px] md:h-[60px]">
+            <Image
+              src="/images/robo/robozinho.png"
+              alt="Chatbot"
+              fill
+              className="rounded-full object-contain"
+              sizes="(max-width: 768px) 45px, 60px"
+            />
+          </div>
         </motion.button>
       </div>
 
@@ -160,26 +162,28 @@ export default function ChatBot() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 right-8 w-96 bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className="fixed bottom-16 right-4 md:bottom-24 md:right-8 w-[calc(100vw-2rem)] md:w-96 max-w-[96vw] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
             {/* Header do chat */}
-            <div className="bg-primary p-4 flex items-center gap-3">
-              <Image
-                src="/images/robo/robozinho.png"
-                alt="Chatbot"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
+            <div className="bg-primary p-3 md:p-4 flex items-center gap-3">
+              <div className="relative w-8 h-8 md:w-10 md:h-10">
+                <Image
+                  src="/images/robo/robozinho.png"
+                  alt="Chatbot"
+                  fill
+                  className="rounded-full object-contain"
+                  sizes="(max-width: 768px) 32px, 40px"
+                />
+              </div>
               <div className="text-white">
-                <h3 className="font-bold">Assistente EJT</h3>
-                <p className="text-sm opacity-90">Online</p>
+                <h3 className="font-bold text-sm md:text-base">Assistente EJT</h3>
+                <p className="text-xs md:text-sm opacity-90">Online</p>
               </div>
             </div>
 
             {/* Área de mensagens */}
-            <div className="h-96 overflow-y-auto p-4 bg-gray-50">
-              <div className="flex flex-col space-y-4">
+            <div className="h-[50vh] md:h-96 overflow-y-auto p-3 md:p-4 bg-gray-50">
+              <div className="flex flex-col space-y-3 md:space-y-4">
                 {messages.map((message, index) => (
                   <motion.div
                     key={index}
@@ -188,7 +192,7 @@ export default function ChatBot() {
                     className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                      className={`max-w-[80%] rounded-2xl px-3 py-2 md:px-4 md:py-2 text-sm ${
                         message.type === 'user'
                           ? 'bg-primary text-white'
                           : 'bg-white shadow-md'
@@ -203,7 +207,7 @@ export default function ChatBot() {
             </div>
 
             {/* Área de opções */}
-            <div className="p-4 bg-white border-t">
+            <div className="p-3 md:p-4 bg-white border-t">
               <div className="flex flex-col gap-2">
                 {currentOptions.map((option, index) => (
                   <motion.button
@@ -212,7 +216,7 @@ export default function ChatBot() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     onClick={() => handleOptionClick(option)}
-                    className="w-full px-4 py-2 text-left rounded-lg bg-gray-50 hover:bg-primary hover:text-white transition-colors duration-200 text-sm"
+                    className="w-full px-3 py-2 md:px-4 md:py-2 text-left rounded-lg bg-gray-50 hover:bg-primary hover:text-white transition-colors duration-200 text-sm"
                   >
                     {option.text}
                   </motion.button>

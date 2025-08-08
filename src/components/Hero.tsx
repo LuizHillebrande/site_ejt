@@ -11,7 +11,7 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative w-full h-[calc(100vh-5rem)]"
+        className="relative w-full h-[calc(100vh-5rem)] min-h-[500px]"
       >
         <Image
           src="/images/header/header_principal.png"
@@ -22,17 +22,20 @@ export default function Hero() {
           sizes="100vw"
           className="object-cover"
           style={{
-            objectPosition: "center 30%"
+            objectPosition: "center 30%",
+            transform: "none",
+            touchAction: "pan-y pinch-zoom"
           }}
+          draggable="false"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/30 via-transparent to-primary/30" />
         
-        {/* Botão de serviços */}
+        {/* Botão de serviços - apenas desktop */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="absolute bottom-12 left-8 z-10"
+          className="absolute bottom-12 left-8 z-10 hidden md:block"
         >
           <a 
             href="/servicos" 
