@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Empresa Júnior Toledo",
@@ -29,6 +30,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <ChatBot />
+        <WhatsAppButton />
       </body>
     </html>
   );

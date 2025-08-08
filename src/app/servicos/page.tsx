@@ -8,6 +8,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import ImageEditor from '@/components/ImageEditor';
+import ServicosContent from '@/components/ServicosContent';
 
 const servicos = [
   {
@@ -255,6 +256,9 @@ export default function ServicosPage() {
           onEdit={handleEdit}
         />
       ))}
+
+      {/* Consultoria Section */}
+      <ServicosContent />
 
       {/* Editor Modal */}
       {currentService && (

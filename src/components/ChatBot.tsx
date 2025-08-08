@@ -43,12 +43,12 @@ const chatOptions: Option[] = [
     nextOptions: [
       {
         text: "Endereço",
-        response: "Estamos localizados na Praça Raul Furquim, 9-31, Vila Universitária, Bauru - SP, CEP: 17012-020",
+        response: "Estamos localizados na Rua Alvino Gomes Teixeira, 340, Presidente Prudente - SP, CEP: 19030-440",
         nextOptions: []
       },
       {
         text: "Telefone/Email",
-        response: "Entre em contato através do email: contato@ejt.com.br ou pelo telefone (14) 99999-9999",
+        response: "Entre em contato através do email: empresajrtoledo@gmail.com ou pelo telefone (14) 99999-9999",
         nextOptions: []
       }
     ]

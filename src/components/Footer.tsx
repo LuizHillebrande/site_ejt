@@ -19,16 +19,16 @@ export default function Footer() {
           
           <div className="text-center md:text-left">
             <h3 className="text-xl font-semibold mb-4">Contato</h3>
-            <p className="mb-2">Email: contato@ejt.com.br</p>
+            <p className="mb-2">Email: empresajrtoledo@gmail.com</p>
             <p>Telefone: (14) 99999-9999</p>
           </div>
 
           <div className="mt-6 md:mt-0">
             <h3 className="text-xl font-semibold mb-4">Endereço</h3>
             <p className="text-center md:text-left">
-              Praça Raul Furquim, 9-31<br />
-              Vila Universitária, Bauru - SP<br />
-              CEP: 17012-020
+              Rua Alvino Gomes Teixeira, 340<br />
+              Presidente Prudente - SP<br />
+              CEP: 19030-440
             </p>
           </div>
         </div>
