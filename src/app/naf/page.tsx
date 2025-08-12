@@ -262,8 +262,7 @@ export default function NAFPage() {
                 key={service.title}
                 className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow relative overflow-hidden group"
                 variants={itemVariants}
-                whileHover="hover"
-                animate={cardHoverVariants}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
                 <div className="absolute top-0 right-0 bg-primary/10 text-primary font-bold py-1 px-3 rounded-bl-lg">
                   <CountUp
