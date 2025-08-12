@@ -22,10 +22,20 @@ export default function LoginPage() {
     }
 
     if (username === adminUsername && password === adminPassword) {
-      // Configura o cookie
-      document.cookie = "adminToken=logged_in; path=/";
-      // Redireciona
-      router.push("/admin/dashboard");
+      // Configura o cookie com uma data de expiração e flags de segurança
+      const date = new Date();
+      date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 dias
+      document.cookie = `adminToken=logged_in; path=/; expires=${date.toUTCString()}; SameSite=Strict`;
+      
+      // Limpa os campos
+      setUsername("");
+      setPassword("");
+      setError("");
+      
+      // Redireciona após um pequeno delay para garantir que o cookie foi definido
+      setTimeout(() => {
+        router.push("/admin/dashboard");
+      }, 100);
     } else {
       setError("Usuário ou senha inválidos");
     }
