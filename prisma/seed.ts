@@ -3,20 +3,18 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Cria um registro inicial de views
-  await prisma.pageView.upsert({
-    where: { page: 'all' },
-    update: {},
-    create: {
-      page: 'all',
-      views: 1
-    }
-  });
-
   // Limpa os dados existentes
   await prisma.teamMember.deleteMany()
   await prisma.project.deleteMany()
   await prisma.pageView.deleteMany()
+
+  // Cria um registro inicial de views
+  await prisma.pageView.create({
+    data: {
+      page: 'all',
+      views: 1
+    }
+  });
 
   // Adiciona os membros da equipe
   const members = [
