@@ -13,7 +13,15 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (username === "admin" && password === "ejt2024") {
+    const adminUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME;
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+
+    if (!adminUsername || !adminPassword) {
+      setError("Erro na configuração do sistema. Contate o administrador.");
+      return;
+    }
+
+    if (username === adminUsername && password === adminPassword) {
       // Configura o cookie
       document.cookie = "adminToken=logged_in; path=/";
       // Redireciona

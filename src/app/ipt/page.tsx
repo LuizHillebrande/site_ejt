@@ -135,7 +135,9 @@ export default function IPT() {
             Desde 1994, monitoramos os preços da cesta básica de Presidente Prudente, gerando relatórios mensais sobre inflação e tendências econômicas.
           </motion.p>
           <motion.a
-            href="#"
+            href="https://app.powerbi.com/view?r=eyJrIjoiZTc1NTA4MDItYjRiOC00MjVjLWJlNjMtYzIwZjA5MmM4NmIzIiwidCI6IjJmMGM2MTMzLWE3NDQtNDNhNC04MTY2LTEwYjA5ODZjOThjNCJ9"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-secondary transition duration-300 hover:scale-105 text-lg"
             whileHover={{ scale: 1.05 }}
           >

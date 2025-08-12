@@ -10,7 +10,6 @@ const navLinks = [
   { href: "/servicos", label: "Serviços" },
   { href: "/ipt", label: "IPT" },
   { href: "/naf", label: "NAF" },
-  { href: "/contato", label: "Contato" },
 ];
 
 export default function Header() {

@@ -70,7 +70,7 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h3 className="text-xl font-semibold mb-4">Contato</h3>
             <p className="mb-2">Email: empresajrtoledo@gmail.com</p>
-            <p>Telefone: (14) 99999-9999</p>
+            <p>Telefone: (18) 99804-3480</p>
           </div>
 
           <div className="mt-6 md:mt-0">

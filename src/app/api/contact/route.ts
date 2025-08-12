@@ -1,132 +1,43 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-// Configuração do transporter do nodemailer
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.SENHA_USER
-  }
-});
-
-// Template HTML para o e-mail
-const getEmailTemplate = (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .header {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 8px 8px 0 0;
-      text-align: center;
-    }
-    .content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 0 0 8px 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .field {
-      margin-bottom: 15px;
-    }
-    .label {
-      font-weight: bold;
-      color: #666;
-    }
-    .value {
-      color: #333;
-    }
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #ff6b6b;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    .footer {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
-      font-size: 0.9em;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h2>Nova Mensagem Recebida</h2>
-  </div>
-  <div class="content">
-    <div class="field">
-      <div class="label">Nome:</div>
-      <div class="value">${data.name}</div>
-    </div>
-    <div class="field">
-      <div class="label">E-mail:</div>
-      <div class="value">${data.email}</div>
-    </div>
-    <div class="field">
-      <div class="label">Assunto:</div>
-      <div class="value">${data.subject}</div>
-    </div>
-    <div class="field">
-      <div class="label">Mensagem:</div>
-      <div class="value">${data.message}</div>
-    </div>
-    
-    <a href="mailto:${data.email}?subject=Re: ${encodeURIComponent(data.subject)}&body=Olá ${data.name},%0D%0A%0D%0AVi sua mensagem..." 
-       class="button">
-      Responder
-    </a>
-  </div>
-  <div class="footer">
-    <p>Esta mensagem foi enviada através do formulário de contato do site.</p>
-  </div>
-</body>
-</html>
-`;
-
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
-    
-    // Validação básica
-    if (!data.name || !data.email || !data.subject || !data.message) {
-      return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
-        { status: 400 }
-      );
-    }
+    const { name, email, message } = await request.json();
 
-    // Configuração do e-mail
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'empresajrtoledo@gmail.com',
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+
+    const emailTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #FF6B00;">Nova mensagem do site EJT</h2>
+        <p><strong>Nome:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Mensagem:</strong></p>
+        <p style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">${message}</p>
+        <div style="margin-top: 20px;">
+          <a href="mailto:${email}" style="background-color: #FF6B00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Responder</a>
+        </div>
+      </div>
+    `;
+
     const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: `Contato via Site: ${data.subject}`,
-      html: getEmailTemplate(data)
+      from: 'empresajrtoledo@gmail.com',
+      to: 'empresajrtoledo@gmail.com',
+      subject: `Contato via Site - ${name}`,
+      html: emailTemplate
     };
 
-    // Envia o e-mail
     await transporter.sendMail(mailOptions);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: 'Email enviado com sucesso!' });
   } catch (error) {
-    console.error('Error sending email:', error);
-    return NextResponse.json(
-      { error: 'Erro ao enviar mensagem' },
-      { status: 500 }
-    );
+    console.error('Erro ao enviar email:', error);
+    return NextResponse.json({ error: 'Erro ao enviar email' }, { status: 500 });
   }
 } 
