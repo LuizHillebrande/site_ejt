@@ -1,6 +1,6 @@
 "use client";
-import { motion, useAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
 const team = [
   { name: "Letícia Costa", role: "Presidente", image: "/images/equipe/leticia_costa.png" },
@@ -9,12 +9,10 @@ const team = [
   { name: "Camila Prado", role: "Diretora de Marketing", image: "/images/equipe/camila_prado.png" },
 ];
 
-// Duplicar o array para efeito infinito
-const infiniteTeam = [...team, ...team];
-
 export default function TeamCarousel() {
-  const controls = useAnimation();
   const [mounted, setMounted] = useState(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -22,26 +20,45 @@ export default function TeamCarousel() {
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !carouselRef.current) return;
 
-    let timeoutId: NodeJS.Timeout;
-    const animate = async () => {
-      while (mounted) {
-        await controls.start({ x: "-50%" }, { duration: 10, ease: "linear" });
-        if (mounted) {
-          controls.set({ x: 0 });
-          // Pequena pausa para evitar flickering
-          timeoutId = setTimeout(animate, 50);
-        }
+    let animationFrameId: number;
+    let startTime: number;
+    const duration = 30000; // 30 segundos para uma volta completa
+    const itemWidth = 272; // 240px width + 32px gap
+    const totalWidth = itemWidth * team.length;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      
+      // Calcula a nova posição
+      let newPosition = -(elapsed % duration) * totalWidth / duration;
+      
+      // Se chegou ao final do primeiro conjunto, reseta para o início suavemente
+      if (-newPosition >= totalWidth) {
+        newPosition = 0;
+        startTime = timestamp;
       }
+      
+      if (carouselRef.current) {
+        carouselRef.current.style.transform = `translateX(${newPosition}px)`;
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
-  }, [controls, mounted]);
+  }, [mounted]);
+
+  // Criar três conjuntos do time para o efeito infinito
+  const displayTeam = [...team, ...team, ...team];
 
   return (
     <section id="equipe" className="bg-background py-24">
@@ -55,24 +72,33 @@ export default function TeamCarousel() {
           Nossa Equipe
         </motion.h2>
         <div className="relative overflow-hidden">
-          <motion.div
-            className="flex gap-8"
-            animate={controls}
+          <div className="absolute inset-0 pointer-events-none z-10">
+            <div className="absolute left-0 w-32 h-full bg-gradient-to-r from-background to-transparent"></div>
+            <div className="absolute right-0 w-32 h-full bg-gradient-to-l from-background to-transparent"></div>
+          </div>
+          <div
+            ref={carouselRef}
+            className="flex gap-8 transition-transform duration-1000 ease-linear"
             style={{ width: "max-content" }}
           >
-            {infiniteTeam.map((member, i) => (
+            {displayTeam.map((member, i) => (
               <div
-                key={i + member.name}
+                key={i}
                 className="min-w-[240px] bg-white rounded-xl shadow-lg p-8 text-center hover:shadow-2xl transition-shadow border-t-4 border-primary flex-shrink-0"
               >
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-gray-100 overflow-hidden flex items-center justify-center border-4 border-primary">
-                  <img src={member.image} alt={member.name} className="object-cover w-full h-full" />
+                  <img 
+                    src={member.image} 
+                    alt={member.name} 
+                    className="object-cover w-full h-full"
+                    draggable={false}
+                  />
                 </div>
                 <h3 className="font-sans text-xl font-bold text-primary mb-2">{member.name}</h3>
                 <p className="text-gray-700">{member.role}</p>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

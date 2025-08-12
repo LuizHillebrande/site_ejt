@@ -86,7 +86,7 @@ const getEmailTemplate = (data: any) => `
       <div class="value">${data.message}</div>
     </div>
     
-    <a href="mailto:${process.env.EMAIL_USER}?subject=Re: ${encodeURIComponent(data.subject)}&body=Olá ${data.name},%0D%0A%0D%0AVi sua mensagem..." 
+    <a href="mailto:${data.email}?subject=Re: ${encodeURIComponent(data.subject)}&body=Olá ${data.name},%0D%0A%0D%0AVi sua mensagem..." 
        class="button">
       Responder
     </a>
