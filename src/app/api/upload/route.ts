@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir, appendFile } from 'fs/promises';
-import { join } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configurar Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Tipos de arquivo permitidos
 const ALLOWED_TYPES = [
@@ -13,16 +19,13 @@ const ALLOWED_TYPES = [
 // Tamanho máximo: 5MB
 const MAX_SIZE = 5 * 1024 * 1024;
 
-// Mapeia a seção para o diretório correto
-const SECTION_DIRS = {
-  'servicos': 'public/images/servicos',
-  'ipt': 'public/images/ipt/carrousel',
+// Mapeia a seção para a pasta no Cloudinary
+const SECTION_FOLDERS = {
+  'servicos': 'ejt/servicos',
+  'ipt': 'ejt/ipt',
 } as const;
 
-type Section = keyof typeof SECTION_DIRS;
-
-// Arquivo de log para imagens pendentes de commit
-const PENDING_IMAGES_LOG = join(process.cwd(), '.pending-images.log');
+type Section = keyof typeof SECTION_FOLDERS;
 
 export async function POST(request: Request) {
   try {
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!SECTION_DIRS[section]) {
+    if (!SECTION_FOLDERS[section]) {
       return NextResponse.json(
         { error: 'Seção inválida' },
         { status: 400 }
@@ -79,38 +82,33 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Gerar nome único mantendo a extensão original
-      const timestamp = Date.now();
-      const randomString = Math.random().toString(36).substring(2, 8);
-      const extension = file.name.split('.').pop();
-      const fileName = `img_${timestamp}_${randomString}.${extension}`;
-      
-      // Garantir que o diretório existe
-      const uploadDir = join(process.cwd(), SECTION_DIRS[section]);
-      await mkdir(uploadDir, { recursive: true });
-      
-      // Caminho completo do arquivo
-      const path = join(uploadDir, fileName);
-
-      // Converter arquivo para ArrayBuffer e salvar
+      // Converter arquivo para base64
       const bytes = await file.arrayBuffer();
-      await writeFile(path, new Uint8Array(bytes));
+      const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString('base64');
+      const dataURI = `data:${file.type};base64,${base64}`;
 
-      // Adicionar ao log de imagens pendentes
-      const relativePath = path.replace(process.cwd() + '/', '');
-      const logEntry = `${new Date().toISOString()}\t${section}\t${relativePath}\n`;
-      await appendFile(PENDING_IMAGES_LOG, logEntry);
+      // Upload para o Cloudinary
+      const result = await cloudinary.uploader.upload(dataURI, {
+        folder: SECTION_FOLDERS[section],
+        resource_type: 'image',
+        // Otimizações automáticas
+        quality: 'auto',
+        fetch_format: 'auto',
+        // Manter proporção original
+        aspect_ratio: '1.0',
+        // Gerar URLs amigáveis
+        public_id: `img_${Date.now()}`,
+      });
 
-      // Retorna o caminho relativo da imagem (para usar no src)
-      const imageUrl = `/${SECTION_DIRS[section].replace('public/', '')}/${fileName}`;
       return NextResponse.json({ 
         success: true,
-        fileName: imageUrl
+        fileName: result.secure_url
       });
     } catch (error) {
-      console.error('Erro ao salvar arquivo:', error);
+      console.error('Erro ao fazer upload:', error);
       return NextResponse.json(
-        { error: 'Erro ao salvar arquivo' },
+        { error: 'Erro ao fazer upload da imagem' },
         { status: 500 }
       );
     }
