@@ -268,6 +268,7 @@ export default function ServicosPage() {
           onCancel={() => setEditingService(null)}
           title={`Editar imagens - ${currentService.titulo}`}
           description="Adicione ou remova imagens do carrossel. As imagens devem ter proporção 4:3 para melhor visualização."
+          section="servicos"
         />
       )}
     </div>

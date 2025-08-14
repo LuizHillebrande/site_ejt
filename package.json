@@ -15,7 +15,8 @@
     "test:all": "npm run test:security && npm run test:e2e && npm run test:load",
     "db:clean": "ts-node scripts/clean-test-members.ts",
     "db:update-roles": "ts-node scripts/update-roles.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "commit-images": "ts-node scripts/commit-pending-images.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

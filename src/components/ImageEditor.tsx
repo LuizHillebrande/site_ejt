@@ -6,10 +6,11 @@ import Image from 'next/image';
 
 interface ImageEditorProps {
   images: string[];
-  onSave: (images: string[]) => Promise<void>;
+  onSave: (images: string[]) => void;
   onCancel: () => void;
-  title: string;
+  title?: string;
   description?: string;
+  section: 'servicos' | 'ipt';
 }
 
 // Função para pegar a URL base
@@ -20,7 +21,7 @@ const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export default function ImageEditor({ images, onSave, onCancel, title, description }: ImageEditorProps) {
+export default function ImageEditor({ images, onSave, onCancel, title, description, section }: ImageEditorProps) {
   const [currentImages, setCurrentImages] = useState<string[]>(images);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,19 +37,19 @@ export default function ImageEditor({ images, onSave, onCancel, title, descripti
     try {
       const formData = new FormData();
       formData.append('file', files[0]);
+      formData.append('section', section);
 
-      const baseUrl = getBaseUrl();
-      const response = await fetch(`${baseUrl}/api/upload`, {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao fazer upload');
+        throw new Error(data.error || 'Erro ao fazer upload');
       }
 
-      const data = await response.json();
       setCurrentImages([...currentImages, data.fileName]);
     } catch (error) {
       console.error('Erro no upload:', error);

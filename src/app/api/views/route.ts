@@ -3,15 +3,13 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const views = await prisma.pageView.aggregate({
+    const result = await prisma.pageView.aggregate({
       _sum: {
         views: true
       }
     });
 
-    return NextResponse.json({ 
-      total: views._sum.views || 0 
-    });
+    return NextResponse.json({ views: result._sum.views || 0 });
   } catch (error) {
     console.error('Erro ao buscar visualizações:', error);
     return NextResponse.json(
@@ -23,63 +21,29 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // Validar Content-Type
-    const contentType = request.headers.get('content-type');
-    if (!contentType?.includes('application/json')) {
-      return NextResponse.json(
-        { error: 'Content-Type deve ser application/json' },
-        { status: 400 }
-      );
-    }
+    const { page = 'all' } = await request.json();
 
-    let body;
-    try {
-      body = await request.json();
-    } catch (e) {
-      return NextResponse.json(
-        { error: 'JSON inválido' },
-        { status: 400 }
-      );
-    }
+    // Cria um novo registro de visualização
+    await prisma.pageView.create({
+      data: {
+        page,
+        views: 1,
+        viewedAt: new Date()
+      }
+    });
 
-    const { page } = body;
+    // Retorna o total atualizado
+    const result = await prisma.pageView.aggregate({
+      _sum: {
+        views: true
+      }
+    });
 
-    // Validar página
-    if (!page || typeof page !== 'string') {
-      return NextResponse.json(
-        { error: 'Página é obrigatória e deve ser uma string' },
-        { status: 400 }
-      );
-    }
-
-    // Limitar tamanho da string da página
-    if (page.length > 100) {
-      return NextResponse.json(
-        { error: 'Nome da página muito longo' },
-        { status: 400 }
-      );
-    }
-
-    try {
-      await prisma.pageView.create({
-        data: {
-          page,
-          views: 1
-        }
-      });
-
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.error('Erro ao registrar visualização:', error);
-      return NextResponse.json(
-        { error: 'Erro ao registrar visualização' },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json({ views: result._sum.views || 0 });
   } catch (error) {
-    console.error('Erro inesperado:', error);
+    console.error('Erro ao registrar visualização:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro ao registrar visualização' },
       { status: 500 }
     );
   }
