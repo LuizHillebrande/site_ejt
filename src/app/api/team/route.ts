@@ -2,11 +2,22 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const members = await prisma.teamMember.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-  
-  return NextResponse.json(members);
+  try {
+    console.log('Buscando membros da equipe...');
+    const members = await prisma.teamMember.findMany({
+      orderBy: {
+        id: 'asc'
+      }
+    });
+    console.log('Membros encontrados:', members);
+    return NextResponse.json(members);
+  } catch (error) {
+    console.error('Erro ao buscar membros:', error);
+    return NextResponse.json(
+      { error: 'Erro ao buscar membros' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
