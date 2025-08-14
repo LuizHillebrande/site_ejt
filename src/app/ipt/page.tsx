@@ -250,8 +250,9 @@ export default function IPT() {
           images={currentImages}
           onSave={handleSave}
           onCancel={() => setShowEditor(false)}
-          title="Editar imagens do IPT"
-          description="Adicione ou remova imagens do carrossel. As imagens devem ter proporção 4:3 para melhor visualização."
+          title="Editar Imagens do IPT"
+          description="Adicione ou remova imagens do carrossel do IPT."
+          section="ipt"
         />
       )}
     </main>
