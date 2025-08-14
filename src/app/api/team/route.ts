@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, warmupPrisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
+    // Aquece a conexão antes de fazer a query
+    await warmupPrisma();
+
     console.log('Buscando membros da equipe...');
     const members = await prisma.teamMember.findMany({
       orderBy: {

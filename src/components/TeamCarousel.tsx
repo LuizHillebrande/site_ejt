@@ -30,19 +30,33 @@ export default function TeamCarousel() {
         setError(null);
         console.log('Buscando membros...');
         
-        const response = await fetch('/api/team', {
-          cache: 'no-store',
-          next: { revalidate: 0 }
-        });
+        // Função para fazer o fetch com retry
+        const fetchWithRetry = async (retries = 3, delay = 1000) => {
+          for (let i = 0; i < retries; i++) {
+            try {
+              const response = await fetch('/api/team', {
+                cache: 'no-store',
+                next: { revalidate: 0 }
+              });
 
-        console.log('Status da resposta:', response.status);
-        const data = await response.json();
-        console.log('Dados recebidos:', data);
+              console.log('Status da resposta:', response.status);
+              const data = await response.json();
+              console.log('Dados recebidos:', data);
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Falha ao carregar membros');
-        }
+              if (!response.ok) {
+                throw new Error(data.error || 'Falha ao carregar membros');
+              }
 
+              return data;
+            } catch (error) {
+              console.error(`Tentativa ${i + 1}/${retries} falhou:`, error);
+              if (i === retries - 1) throw error;
+              await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+            }
+          }
+        };
+
+        const data = await fetchWithRetry();
         const activeMembers = data.filter((member: TeamMember) => member.active);
         console.log('Membros ativos:', activeMembers);
         setTeam(activeMembers);
