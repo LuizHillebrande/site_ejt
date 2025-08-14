@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
     "start": "next start",
     "lint": "next lint",
     "db:seed": "ts-node prisma/seed.ts",
@@ -14,7 +14,8 @@
     "test:load:debug": "artillery run tests/load/load-test-debug.yml",
     "test:all": "npm run test:security && npm run test:e2e && npm run test:load",
     "db:clean": "ts-node scripts/clean-test-members.ts",
-    "db:update-roles": "ts-node scripts/update-roles.ts"
+    "db:update-roles": "ts-node scripts/update-roles.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
