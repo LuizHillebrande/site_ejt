@@ -14,7 +14,9 @@ export default function NewEventModal({ isOpen, onClose, onSubmit }: NewEventMod
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, date, description });
+    // Formatar a data para ISO string (mantendo apenas a parte da data)
+    const formattedDate = new Date(date + 'T00:00:00').toISOString().split('T')[0];
+    onSubmit({ name, date: formattedDate, description });
     setName('');
     setDate('');
     setDescription('');

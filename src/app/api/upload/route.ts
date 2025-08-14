@@ -95,10 +95,12 @@ export async function POST(request: Request) {
         // Otimizações automáticas
         quality: 'auto',
         fetch_format: 'auto',
-        // Manter proporção original
-        aspect_ratio: '1.0',
-        // Gerar URLs amigáveis
-        public_id: `img_${Date.now()}`,
+        // Manter proporção e limitar tamanho máximo
+        transformation: [
+          { width: 1200, crop: 'limit' },
+          { quality: 'auto' },
+          { fetch_format: 'auto' }
+        ]
       });
 
       return NextResponse.json({ 

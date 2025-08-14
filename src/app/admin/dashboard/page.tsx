@@ -97,13 +97,14 @@ export default function AdminDashboard() {
   };
 
   const handleNewProject = async (data: { title: string; description: string }) => {
+    const startDate = new Date().toISOString().split('T')[0];
     const response = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...data,
         status: 'em_andamento',
-        startDate: new Date(),
+        startDate,
       })
     });
 
@@ -186,25 +187,19 @@ export default function AdminDashboard() {
   };
 
   const handleCompleteProject = async (id: number) => {
-    const now = new Date().toISOString();
+    const endDate = new Date().toISOString().split('T')[0];
     const response = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         status: 'concluido' as const,
-        endDate: now
+        endDate
       })
     });
 
     if (response.ok) {
-      setProjects(prev => prev.map(p => 
-        p.id === id 
-          ? { ...p, status: 'concluido', endDate: now } 
-          : p
-      ));
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, status: 'concluido', endDate } : p));
       await registerActivity('project', 'update', `Projeto marcado como concluído`);
-    } else {
-      alert('Erro ao concluir projeto');
     }
   };
 
