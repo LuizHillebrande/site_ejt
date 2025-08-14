@@ -38,7 +38,8 @@ export default function ImageEditor({ images, onSave, onCancel, title, descripti
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao fazer upload');
+        const data = await response.json();
+        throw new Error(data.error + (data.debug ? `\n\nDebug Info:\n${JSON.stringify(data.debug, null, 2)}` : ''));
       }
 
       setCurrentImages([...currentImages, data.fileName]);

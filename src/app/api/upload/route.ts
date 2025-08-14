@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Log das configurações (sem expor secrets)
-console.log('Cloudinary Config:', {
+console.log('Cloudinary Config Debug:', {
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  hasApiKey: !!process.env.CLOUDINARY_API_KEY,
-  hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
+  api_key_length: process.env.CLOUDINARY_API_KEY?.length || 0,
+  api_secret_length: process.env.CLOUDINARY_API_SECRET?.length || 0,
+  has_cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
+  has_api_key: !!process.env.CLOUDINARY_API_KEY,
+  has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
+  node_env: process.env.NODE_ENV,
+  all_env_keys: Object.keys(process.env).filter(key => key.includes('CLOUDINARY'))
 });
 
 // Configurar Cloudinary
@@ -111,12 +116,23 @@ export async function POST(request: Request) {
     }
 
     try {
-      console.log('Preparando upload para o Cloudinary...');
       // Converter arquivo para base64
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const base64 = buffer.toString('base64');
       const dataURI = `data:${file.type};base64,${base64}`;
+
+      // Debug info
+      const debugInfo = {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key_length: process.env.CLOUDINARY_API_KEY?.length || 0,
+        api_secret_length: process.env.CLOUDINARY_API_SECRET?.length || 0,
+        has_cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
+        has_api_key: !!process.env.CLOUDINARY_API_KEY,
+        has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
+        node_env: process.env.NODE_ENV,
+        all_env_keys: Object.keys(process.env).filter(key => key.includes('CLOUDINARY'))
+      };
 
       console.log('Iniciando upload no Cloudinary para a pasta:', SECTION_FOLDERS[section]);
       // Upload para o Cloudinary
@@ -145,6 +161,17 @@ export async function POST(request: Request) {
       });
     } catch (error) {
       // Log detalhado do erro do Cloudinary
+      const debugInfo = {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key_length: process.env.CLOUDINARY_API_KEY?.length || 0,
+        api_secret_length: process.env.CLOUDINARY_API_SECRET?.length || 0,
+        has_cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
+        has_api_key: !!process.env.CLOUDINARY_API_KEY,
+        has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
+        node_env: process.env.NODE_ENV,
+        all_env_keys: Object.keys(process.env).filter(key => key.includes('CLOUDINARY'))
+      };
+
       console.error('Erro detalhado do upload:', {
         error,
         message: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -153,11 +180,26 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json(
-        { error: `Erro ao fazer upload da imagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}` },
+        { 
+          error: `Erro ao fazer upload da imagem: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+          debug: debugInfo
+        },
         { status: 500 }
       );
     }
   } catch (error) {
+    // Debug info para erro geral
+    const debugInfo = {
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key_length: process.env.CLOUDINARY_API_KEY?.length || 0,
+      api_secret_length: process.env.CLOUDINARY_API_SECRET?.length || 0,
+      has_cloud_name: !!process.env.CLOUDINARY_CLOUD_NAME,
+      has_api_key: !!process.env.CLOUDINARY_API_KEY,
+      has_api_secret: !!process.env.CLOUDINARY_API_SECRET,
+      node_env: process.env.NODE_ENV,
+      all_env_keys: Object.keys(process.env).filter(key => key.includes('CLOUDINARY'))
+    };
+
     console.error('Erro inesperado no upload:', {
       error,
       message: error instanceof Error ? error.message : 'Erro desconhecido',
@@ -165,7 +207,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { error: `Erro interno do servidor: ${error instanceof Error ? error.message : 'Erro desconhecido'}` },
+      { 
+        error: `Erro interno do servidor: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        debug: debugInfo
+      },
       { status: 500 }
     );
   }
