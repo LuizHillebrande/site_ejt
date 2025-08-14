@@ -48,7 +48,7 @@ const chatOptions: Option[] = [
       },
       {
         text: "Telefone/Email",
-        response: "Entre em contato através do email: empresajrtoledo@gmail.com ou pelo telefone (14) 99999-9999",
+        response: "Entre em contato através do email: empresajrtoledo@gmail.com ou pelo telefone (18) 99804-3480",
         nextOptions: []
       }
     ]

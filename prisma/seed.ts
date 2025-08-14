@@ -20,25 +20,25 @@ async function main() {
   const members = [
     { 
       name: "Letícia Costa", 
-      role: "Presidente", 
+      role: "Diretora de projetos", 
       imageUrl: "/images/equipe/leticia_costa.png",
       active: true
     },
     { 
       name: "Larissa Ramos", 
-      role: "Vice-presidente", 
+      role: "Diretora Administrativa", 
       imageUrl: "/images/equipe/larissa_ramos.png",
       active: true
     },
     { 
       name: "Gabriella Oliveira", 
-      role: "Diretora de Projetos", 
+      role: "Consultora", 
       imageUrl: "/images/equipe/gabriella_oliveira.png",
       active: true
     },
     { 
       name: "Camila Prado", 
-      role: "Diretora de Marketing", 
+      role: "Consultora", 
       imageUrl: "/images/equipe/camila_prado.png",
       active: true
     },

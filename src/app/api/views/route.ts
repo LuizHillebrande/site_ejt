@@ -1,24 +1,21 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const page = searchParams.get('page') || 'all';
-
-    // Busca total de todas as páginas
-    const result = await prisma.pageView.aggregate({
+    const views = await prisma.pageView.aggregate({
       _sum: {
         views: true
       }
     });
-    
-    const views = result._sum.views || 0;
-    return NextResponse.json({ views });
+
+    return NextResponse.json({ 
+      total: views._sum.views || 0 
+    });
   } catch (error) {
-    console.error('Error fetching views:', error);
+    console.error('Erro ao buscar visualizações:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch views' },
+      { error: 'Erro ao buscar visualizações' },
       { status: 500 }
     );
   }
@@ -26,28 +23,63 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { page = 'all' } = await request.json();
+    // Validar Content-Type
+    const contentType = request.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Content-Type deve ser application/json' },
+        { status: 400 }
+      );
+    }
 
-    // Cria um novo registro de visualização
-    await prisma.pageView.create({
-      data: {
-        page,
-        views: 1
-      }
-    });
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'JSON inválido' },
+        { status: 400 }
+      );
+    }
 
-    // Retorna o total atualizado
-    const result = await prisma.pageView.aggregate({
-      _sum: {
-        views: true
-      }
-    });
+    const { page } = body;
 
-    return NextResponse.json({ views: result._sum.views || 0 });
+    // Validar página
+    if (!page || typeof page !== 'string') {
+      return NextResponse.json(
+        { error: 'Página é obrigatória e deve ser uma string' },
+        { status: 400 }
+      );
+    }
+
+    // Limitar tamanho da string da página
+    if (page.length > 100) {
+      return NextResponse.json(
+        { error: 'Nome da página muito longo' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await prisma.pageView.create({
+        data: {
+          page,
+          views: 1
+        }
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error('Erro ao registrar visualização:', error);
+      return NextResponse.json(
+        { error: 'Erro ao registrar visualização' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error('Error registering view:', error);
+    console.error('Erro inesperado:', error);
     return NextResponse.json(
-      { error: 'Failed to register view' },
+      { error: 'Erro interno do servidor' },
       { status: 500 }
     );
   }

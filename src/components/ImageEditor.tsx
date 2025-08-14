@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -12,40 +12,57 @@ interface ImageEditorProps {
   description?: string;
 }
 
+// Função para pegar a URL base
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://www.empresajuniortoledo.com.br';
+  }
+  return 'http://localhost:3000';
+};
+
 export default function ImageEditor({ images, onSave, onCancel, title, description }: ImageEditorProps) {
-  const [currentImages, setCurrentImages] = useState(images);
+  const [currentImages, setCurrentImages] = useState<string[]>(images);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files?.length) return;
 
-    setIsLoading(true);
+    setIsUploading(true);
+    setError(null);
     try {
       const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('files', file);
-      });
+      formData.append('file', files[0]);
 
-      const response = await fetch('/api/upload', {
+      const baseUrl = getBaseUrl();
+      const response = await fetch(`${baseUrl}/api/upload`, {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
-      if (!response.ok) throw new Error('Falha ao fazer upload das imagens');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao fazer upload');
+      }
 
-      const { urls } = await response.json();
-      setCurrentImages(prev => [...prev, ...urls]);
+      const data = await response.json();
+      setCurrentImages([...currentImages, data.fileName]);
     } catch (error) {
-      alert('Erro ao fazer upload das imagens');
-      console.error(error);
+      console.error('Erro no upload:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao fazer upload da imagem');
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handleRemoveImage = (index: number) => {
-    setCurrentImages(prev => prev.filter((_, i) => i !== index));
+    setCurrentImages(currentImages.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
@@ -62,70 +79,88 @@ export default function ImageEditor({ images, onSave, onCancel, title, descripti
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-            <button
-              onClick={onCancel}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <XMarkIcon className="w-6 h-6 text-gray-500" />
-            </button>
-          </div>
-          {description && (
-            <p className="mt-2 text-gray-600">{description}</p>
-          )}
-        </div>
-
-        <div className="p-6 overflow-y-auto flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {currentImages.map((image, index) => (
-              <div key={index} className="relative aspect-video group">
-                <Image
-                  src={image}
-                  alt={`Imagem ${index + 1}`}
-                  fill
-                  className="object-cover rounded-lg"
-                />
-                <button
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <XMarkIcon className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-
-            <label className="relative aspect-video border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors">
-              <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
-              <span className="mt-2 text-sm text-gray-500">Adicionar imagem</span>
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">{title || 'Editar Imagens'}</h2>
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            disabled={isLoading}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+
+        {description && (
+          <p className="text-gray-600 mb-4">{description}</p>
+        )}
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          {currentImages.map((image, index) => (
+            <div key={index} className="relative group aspect-video">
+              <Image
+                src={image}
+                alt={`Imagem ${index + 1}`}
+                fill
+                className="object-cover rounded-lg"
+              />
+              <button
+                onClick={() => handleRemoveImage(index)}
+                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full 
+                         opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          
+          <label className={`
+            relative aspect-video border-2 border-dashed rounded-lg
+            flex items-center justify-center cursor-pointer
+            hover:bg-gray-50 transition-colors
+            ${isUploading ? 'bg-gray-100 cursor-wait' : ''}
+          `}>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              ref={fileInputRef}
+              disabled={isUploading}
+            />
+            {isUploading ? (
+              <div className="flex flex-col items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="mt-2 text-sm text-gray-500">Enviando...</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <ArrowUpTrayIcon className="h-8 w-8 text-gray-400" />
+                <span className="mt-2 text-sm text-gray-500">Adicionar Imagem</span>
+              </div>
+            )}
+          </label>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800"
           >
             Cancelar
           </button>
           <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-            disabled={isLoading}
+            onClick={() => onSave(currentImages)}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            disabled={isUploading}
           >
-            {isLoading ? 'Salvando...' : 'Salvar alterações'}
+            Salvar Alterações
           </button>
         </div>
       </div>

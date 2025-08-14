@@ -2,25 +2,45 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
-const team = [
-  { name: "Letícia Costa", role: "Presidente", image: "/images/equipe/leticia_costa.png" },
-  { name: "Larissa Ramos", role: "Vice-presidente", image: "/images/equipe/larissa_ramos.png" },
-  { name: "Gabriella Oliveira", role: "Diretora de Projetos", image: "/images/equipe/gabriella_oliveira.png" },
-  { name: "Camila Prado", role: "Diretora de Marketing", image: "/images/equipe/camila_prado.png" },
-];
+interface TeamMember {
+  name: string;
+  role: string;
+  imageUrl: string;
+  active: boolean;
+}
 
 export default function TeamCarousel() {
   const [mounted, setMounted] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(0);
+  const [team, setTeam] = useState<TeamMember[]>([]);
 
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
+  // Buscar membros ativos
   useEffect(() => {
-    if (!mounted || !carouselRef.current) return;
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch('/api/team', {
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
+        if (!response.ok) throw new Error('Falha ao carregar membros');
+        const data = await response.json();
+        setTeam(data.filter((member: TeamMember) => member.active));
+      } catch (error) {
+        console.error('Erro ao carregar membros:', error);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !carouselRef.current || team.length === 0) return;
 
     let animationFrameId: number;
     let startTime: number;
@@ -55,10 +75,14 @@ export default function TeamCarousel() {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [mounted]);
+  }, [mounted, team]);
 
   // Criar três conjuntos do time para o efeito infinito
   const displayTeam = [...team, ...team, ...team];
+
+  if (team.length === 0) {
+    return null; // ou um loading spinner
+  }
 
   return (
     <section id="equipe" className="bg-background py-24">
@@ -88,7 +112,7 @@ export default function TeamCarousel() {
               >
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 bg-gray-100 overflow-hidden flex items-center justify-center border-4 border-primary">
                   <img 
-                    src={member.image} 
+                    src={member.imageUrl} 
                     alt={member.name} 
                     className="object-cover w-full h-full"
                     draggable={false}

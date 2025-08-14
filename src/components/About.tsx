@@ -40,8 +40,7 @@ export default function About() {
               transition={{ delay: 0.1 }}
             >
               A Empresa Júnior Toledo (EJT) é uma associação civil sem fins lucrativos,
-              formada e gerida por alunos do curso de Sistemas de Informação do
-              Centro Universitário Toledo.
+              formada e gerida por alunos do Centro Universitário Toledo.
             </motion.p>
 
             <motion.p
